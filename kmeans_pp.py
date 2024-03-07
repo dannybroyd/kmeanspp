@@ -1,14 +1,16 @@
 import sys
 import pandas as pd
 import numpy as np
-np.random.seed(0)
 
+np.random.seed(0)
+chosen_centroid_indexes = []
 
 def kmeans_pp(k, max_iter, epsilon, n, cluster_data):
     d = len(cluster_data[0])
     initialised_centroids = np.zeros((k, d))
     added_clusters_dict = {}
     random_value = np.random.choice(n)
+    chosen_centroid_indexes.append(random_value)
     print(random_value)
     # choose first cluster at random
     initialised_centroids[0] = cluster_data[random_value]
@@ -33,7 +35,7 @@ def add_cluster_to_initialised(initialised_centroids, cluster_data, cluster_dist
     dists_sum = np.sum(cluster_dists)
     cluster_probs = cluster_dists / dists_sum
     random_value = np.random.choice(n, p=cluster_probs)
-    print(random_value)
+    chosen_centroid_indexes.append(random_value)
     initialised_centroids[cent_index] = cluster_data[random_value]
     added_clusters_dict[random_value] = 1
     return initialised_centroids
