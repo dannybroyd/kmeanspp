@@ -22,12 +22,19 @@ static PyObject *fit(PyObject *self, PyObject *args)
     PyObject *elem_in_vector;
     PyObject *cluster;
     PyObject *elem_in_cluster;
+    PyObject* python_double;
+    PyObject* centroid_pyobj;
+    PyObject* final_centroids_pyobj;
     double num;
     double num_in_cluster;
     int i;
     int j;
+    int cluster;
+    int num_of_vector;
     double **vector_list;
     double **cluster_list;
+    double **final_centroids;
+
     if (!PyArg_ParseTuple(args, "diiiiOO", &EPSILON, &k, &d, &n, &iter, &vector_list_pyobj, &cluster_list_pyobj))
     {
         return NULL; /* In the CPython API, a NULL value is never valid for a
@@ -104,8 +111,44 @@ static PyObject *fit(PyObject *self, PyObject *args)
         }
     }
 
-    /*calling for the main function and returning pyobject (0) to python*/
-    return Py_BuildValue("i", kmeans(double EPSILON, int k, int d, int n, int iter, double **vector_list, double **cluster_list));
+    /* run kmeans in C */
+    final_centroids = kmeans(double EPSILON, int k, int d, int n, int iter, double **vector_list, double **cluster_list);
+
+    /* build pyobject list from 2d array in C */
+    final_centroids_pyobj = PyList_New(k);
+    for (i = 0; i < k; i++){
+        centroid_pyobj = PyList_New(d);
+        for (j = 0; j < d; j++)
+        {
+            python_double = PyFloat_FromDouble(final_centroids[i][j]);
+            PyList_SetItem(centroid_pyobj, j, python_double); 
+        }
+        PyList_SetItem(final_centroids_pyobj, i, centroid_pyobj);
+    }
+
+    /* Free the allocated memory for cluster_list */
+    for (cluster = 0; cluster < k; cluster++)
+    {   
+        free(cluster_list[cluster]);
+    }
+    free(cluster_list);
+
+    /* Free the allocated memory for vector_list */
+    for (num_of_vector = 0; num_of_vector < n; num_of_vector++)
+    {
+        free(vector_list[num_of_vector]);
+    }
+    free(vector_list);
+
+    /* Free the allocated memory for final_centroids */
+    for (cluster = 0; cluster < k; cluster++)
+    {   
+        free(final_centroids[cluster]);
+    }
+    free(final_centroids);
+
+    /* this returns a 2d list as a pyobj */
+    return final_centroids_pyobj;
 }
 
 static PyMethodDef kmeansMethods[] = {

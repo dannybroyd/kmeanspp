@@ -111,9 +111,6 @@ int kmeans(double EPSILON, int k, int d, int n, int iter, double **vector_list, 
         }
     }
 
-    /* free allocated memory */
-    free_vector_cluster_lists(vector_list, cluster_list, k, n);
-
     return final_centroids;
 }
 
