@@ -38,7 +38,7 @@ static PyObject* fit(PyObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "OiiiiOO", &eps_pyobj, &k, &d, &n, &iter, &vector_list_pyobj, &cluster_list_pyobj))
     {
-        printf("pyargs err\n");
+        printf("An Error Has Occurred\n");
         return NULL; /* In the CPython API, a NULL value is never valid for a
                         PyObject* so it is used to signal that an error has occurred. */
     }
@@ -50,7 +50,7 @@ static PyObject* fit(PyObject *self, PyObject *args)
     n, d, k, are all values we send from python! if this isnt the case, we return null. */
     if (PyObject_Length(vector_list_pyobj) != n)
     {
-        printf("length error\n");
+        printf("An Error Has Occurred\n");
         return NULL;
     }
 
@@ -68,7 +68,7 @@ static PyObject* fit(PyObject *self, PyObject *args)
         vector = PyList_GetItem(vector_list_pyobj, i);
         if (PyObject_Length(vector) != d + 1)
         {
-            printf("length error d+1\n");
+            printf("An Error Has Occurred\n");
             return NULL;
         }
         vector_list[i] = (double *)malloc((d + 1) * sizeof(double));
@@ -102,6 +102,7 @@ static PyObject* fit(PyObject *self, PyObject *args)
         cluster = PyList_GetItem(cluster_list_pyobj, i);
         if (PyObject_Length(cluster) != (2 * d + 1))
         {
+            printf("An Error Has Occurred\n");
             return NULL;
         }
         cluster_list[i] = (double *)malloc((2 * d + 1) * sizeof(double));
