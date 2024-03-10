@@ -11,14 +11,18 @@ int find_min_distance_cluster(double *, double **, int, int);
 void assign_vector_to_cluster(double *, int, double **, int);
 double *get_new_centroid(double **, int, int, double *);
 double max(double, double);
-int kmeans(double, int, int, int, int, double **, double **);
+double** kmeans(double, int, int, int, int, double **, double **);
 void free_vector_cluster_lists(double **, double **, int, int);
 
-int kmeans(double EPSILON, int k, int d, int n, int iter, double **vector_list, double **cluster_list)
+int main(){
+    return 0;
+}
+
+double** kmeans(double EPSILON, int k, int d, int n, int iter, double **vector_list, double **cluster_list)
 {
     int new_cluster_id = -1;
     double *old_mean;
-    double *new_mean;
+    double *new_mean = NULL;
     double max_mean_delta = 0;
     double *curr_mean;
     int i;
@@ -38,7 +42,7 @@ int kmeans(double EPSILON, int k, int d, int n, int iter, double **vector_list, 
         free(old_mean);
         free_vector_cluster_lists(vector_list, cluster_list, k, n);
         printf("An Error Has Occurred\n");
-        return 1;
+        return NULL;
     }
 
     product = (double *)malloc(d * sizeof(double));
@@ -49,7 +53,7 @@ int kmeans(double EPSILON, int k, int d, int n, int iter, double **vector_list, 
         free(product);
         free_vector_cluster_lists(vector_list, cluster_list, k, n);
         printf("An Error Has Occurred\n");
-        return 1;
+        return NULL;
     }
 
     for (i = 0; i < iter; i++)
@@ -77,7 +81,13 @@ int kmeans(double EPSILON, int k, int d, int n, int iter, double **vector_list, 
         max_mean_delta = 0;
     }
     free(old_mean);
-    free(new_mean);
+    if (new_mean == NULL){
+        free(product);
+    }
+    else{
+        free(new_mean);
+    }
+    
 
     final_centroids = (double **)malloc(k * sizeof(double*));
 
@@ -86,7 +96,7 @@ int kmeans(double EPSILON, int k, int d, int n, int iter, double **vector_list, 
         free(final_centroids);
         free_vector_cluster_lists(vector_list, cluster_list, k, n);
         printf("An Error Has Occurred\n");
-        return 1;
+        return NULL;
     }
 
     for (cluster = 0; cluster < k; cluster++)
@@ -101,11 +111,11 @@ int kmeans(double EPSILON, int k, int d, int n, int iter, double **vector_list, 
             free_vector_cluster_lists(vector_list, cluster_list, k, n);
             free(final_centroids);
             printf("An Error Has Occurred\n");
-            return 1;
+            return NULL;
         }
         
         curr_mean = &cluster_list[cluster][d + 1];
-        for (val = 0; val < d - 1; val++)
+        for (val = 0; val < d; val++)
         {
             final_centroids[cluster][val] = curr_mean[val];
         }

@@ -7,13 +7,14 @@
 
 
 /*we need iter, k, n, d, vectorlist = [vector, cluster_of_vector], clusterlist = initialised_clusters = [size_of_cluster, vector_of_sums, mean_vector]*/
-static PyObject *fit(PyObject *self, PyObject *args)
+static PyObject* fit(PyObject *self, PyObject *args)
 {
     double EPSILON;
     int k;
     int d;
     int n;
     int iter;
+    PyObject *eps_pyobj;
     PyObject *vector_list_pyobj;
     PyObject *cluster_list_pyobj;
     /* vector is [vector,cluster]*/
@@ -29,21 +30,27 @@ static PyObject *fit(PyObject *self, PyObject *args)
     double num_in_cluster;
     int i;
     int j;
-    int cluster;
+    int cluster_index;
     int num_of_vector;
     double **vector_list;
     double **cluster_list;
     double **final_centroids;
 
-    if (!PyArg_ParseTuple(args, "diiiiOO", &EPSILON, &k, &d, &n, &iter, &vector_list_pyobj, &cluster_list_pyobj))
+    if (!PyArg_ParseTuple(args, "OiiiiOO", &eps_pyobj, &k, &d, &n, &iter, &vector_list_pyobj, &cluster_list_pyobj))
     {
+        printf("pyargs err\n");
         return NULL; /* In the CPython API, a NULL value is never valid for a
                         PyObject* so it is used to signal that an error has occurred. */
     }
+
+    /* turns epsilon float to double */
+    EPSILON = PyFloat_AsDouble(eps_pyobj);
+
     /* THIS PROGRAM ASSUMES THAT vectorlist is [n][d+1] and clusterlist is [k][2d+1]
-    n, d, k, are all values we send from python!*/
+    n, d, k, are all values we send from python! if this isnt the case, we return null. */
     if (PyObject_Length(vector_list_pyobj) != n)
     {
+        printf("length error\n");
         return NULL;
     }
 
@@ -61,6 +68,7 @@ static PyObject *fit(PyObject *self, PyObject *args)
         vector = PyList_GetItem(vector_list_pyobj, i);
         if (PyObject_Length(vector) != d + 1)
         {
+            printf("length error d+1\n");
             return NULL;
         }
         vector_list[i] = (double *)malloc((d + 1) * sizeof(double));
@@ -89,7 +97,7 @@ static PyObject *fit(PyObject *self, PyObject *args)
         return NULL;
     }
     /* this parses pyobject to 2d array of clusters.*/
-    for (i = 0; i < n; i++)
+    for (i = 0; i < k; i++)
     {
         cluster = PyList_GetItem(cluster_list_pyobj, i);
         if (PyObject_Length(cluster) != (2 * d + 1))
@@ -112,7 +120,7 @@ static PyObject *fit(PyObject *self, PyObject *args)
     }
 
     /* run kmeans in C */
-    final_centroids = kmeans(double EPSILON, int k, int d, int n, int iter, double **vector_list, double **cluster_list);
+    final_centroids = kmeans(EPSILON, k, d, n, iter, vector_list, cluster_list);
 
     /* build pyobject list from 2d array in C */
     final_centroids_pyobj = PyList_New(k);
@@ -125,11 +133,11 @@ static PyObject *fit(PyObject *self, PyObject *args)
         }
         PyList_SetItem(final_centroids_pyobj, i, centroid_pyobj);
     }
-
+    
     /* Free the allocated memory for cluster_list */
-    for (cluster = 0; cluster < k; cluster++)
+    for (cluster_index = 0; cluster_index < k; cluster_index++)
     {   
-        free(cluster_list[cluster]);
+        free(cluster_list[cluster_index]);
     }
     free(cluster_list);
 
@@ -141,9 +149,9 @@ static PyObject *fit(PyObject *self, PyObject *args)
     free(vector_list);
 
     /* Free the allocated memory for final_centroids */
-    for (cluster = 0; cluster < k; cluster++)
+    for (cluster_index = 0; cluster_index < k; cluster_index++)
     {   
-        free(final_centroids[cluster]);
+        free(final_centroids[cluster_index]);
     }
     free(final_centroids);
 
@@ -156,7 +164,7 @@ static PyMethodDef kmeansMethods[] = {
      (PyCFunction)fit,                                                                                                                                                                     /* the C-function that implements the Python function and returns static PyObject*  */
      METH_VARARGS,                                                                                                                                                                         /* flags indicating parameters
                                                                                                                                                              accepted for this function */
-     PyDoc_STR(" the kmeanspp algorithm recieves args: epsilon, iter, k, n, d, vectorlist = [vector, cluster_of_vector], clusterlist  = [size_of_cluster, vector_of_sums, mean_vector]")}, /*  The docstring for the function */
+     PyDoc_STR(" the kmeanssp algorithm recieves args: epsilon, iter, k, n, d, vectorlist = [vector, cluster_of_vector], clusterlist  = [size_of_cluster, vector_of_sums, mean_vector]")}, /*  The docstring for the function */
     {NULL, NULL, 0, NULL}                                                                                                                                                                  /* The last entry must be all NULL as shown to act as a
                                                                                                                                                                                               sentinel. Python looks for this entry to know that all
                                                                                                                                                                                               of the functions for the module have been defined. */
