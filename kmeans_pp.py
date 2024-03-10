@@ -21,7 +21,7 @@ def kmeans_pp(k, max_iter, epsilon, n, cluster_data):
     cluster_data = cluster_data.tolist()
     initialised_centroids = initialised_centroids.tolist()
     initialised_centroids = format_lists_for_c(cluster_data, initialised_centroids, chosen_centroid_indexes)
-    results = km.fit(epsilon, k, d, n, max_iter, cluster_data, initialised_centroids)
+    results = km.fit(epsilon, k, d, n, max_iter, cluster_data, initialised_centroids)   
     print_output(results, chosen_centroid_indexes)
 
 
@@ -58,7 +58,7 @@ def main():
     df1 = pd.read_csv(file_path1, header=None)
     df2 = pd.read_csv(file_path2, header=None)
     n = len(df1)
-    check_inputs(k, n, max_iter)
+    check_inputs(k, n, max_iter, epsilon)
     data = df_to_nparray(df1, df2)
     kmeans_pp(int(k), int(max_iter), float(epsilon), n, data)
 
@@ -71,12 +71,15 @@ def df_to_nparray(df1, df2):
     return data
 
 
-def check_inputs(k, n, max_iter):
+def check_inputs(k, n, max_iter, epsilon):
     if int(k) <= 1 or int(k) >= int(n) or not k.isdigit():
         print("Invalid number of clusters!")
         quit()
     if int(max_iter) <= 1 or int(max_iter) >= 1000 or not max_iter.isdigit():
         print("Invalid maximum iteration!")
+        quit()
+    if int(epsilon) < 0:
+        print("Invalid epsilon!")
         quit()
 
 
@@ -127,7 +130,6 @@ def print_output(results, chosen_centroid_indexes):
         for i in range(len(result)-1):
             print('%.4f' % result[i], end=",")
         print('%.4f' % result[len(result)-1])
-
         
 
 
