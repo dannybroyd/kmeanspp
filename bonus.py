@@ -13,18 +13,13 @@ for k in range(1, 11):
     inertia_list.append(model.inertia_)
     k_list.append(k)
 
-max_slope_proportion = 0
-chosen_k = 0
-for i in range(8):
-    slope_1 = (inertia_list[i+1] - inertia_list[i])
-    slope_2 = (inertia_list[i+2] - inertia_list[i+1])
-    if slope_1/slope_2 > max_slope_proportion:
-        max_slope_proportion = slope_1/slope_2
-        chosen_k = i+2
-
-print(chosen_k)
+elbow_point = 3
+plt.scatter(elbow_point, inertia_list[elbow_point-1], color='none', s=1000, zorder=3, edgecolor='r', linestyle='--')
 plt.plot(k_list, inertia_list)
 plt.xticks(k_list)
 plt.xlabel('-----> k')
-plt.show()
+plt.ylabel('Inertia')
+plt.arrow(elbow_point+2, inertia_list[elbow_point-1]+200, -1.5, -150, head_width=0.2, head_length=15)
+plt.annotate('Elbow Point', xy=(elbow_point+1.5, inertia_list[elbow_point-1]+210))
+plt.savefig('elbow.png')
 

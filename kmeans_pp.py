@@ -78,7 +78,7 @@ def check_inputs(k, n, max_iter, epsilon):
     if int(max_iter) <= 1 or int(max_iter) >= 1000 or not max_iter.isdigit():
         print("Invalid maximum iteration!")
         quit()
-    if int(epsilon) < 0:
+    if float(epsilon) < 0:
         print("Invalid epsilon!")
         quit()
 
